@@ -22,7 +22,9 @@ with Windows and macOS. It does this on GitHub's own Windows and macOS runners.
 **What it does, on `windows-latest` and `macos-latest`:**
 1. **Windows only:** installs the optional Windows feature "Tamil Supplemental Fonts" (Latha and Vijaya).
 2. **Lists every Tamil font on the runner** (`tools/list_fonts.py`), with its version, maker, licence fields and checksum.
-3. **Draws one sample line in each font** with headless Google Chrome (`tools/render_sample.py`). It also checks that Chrome really used that font rather than a fallback.
+3. **Draws one sample line in each font face** with headless Google Chrome (`tools/render_sample.py`).
+   - Each face is chosen by its own full name and PostScript name, so Chrome draws exactly that face.
+   - It also checks that Chrome really used that face rather than its default font.
 
 Both scripts use only the Python standard library.
 

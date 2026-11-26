@@ -5,14 +5,14 @@
 
 Without FONT_DIR it scans the usual system font folders of Windows, macOS or Linux. Font collections
 (.ttc) are read face by face. For each Tamil font it records: file, face index, family, typographic
-family, style, full name, version, copyright, maker, licence text, vendor ID, embedding setting,
+family, style, full name, PostScript name, version, copyright, maker, licence text, vendor ID, embedding setting,
 weight class, italic flag, how many Tamil code points (U+0B80-0BFF) it maps, glyph count and the
 file's SHA-256. Fonts are only read, never copied.
 """
 import hashlib, json, os, platform, struct, sys
 
-NAME_IDS = {0: "copyright", 1: "family", 2: "style", 4: "full_name", 5: "version", 8: "maker",
-            13: "licence", 14: "licence_url", 16: "typo_family", 17: "typo_style"}
+NAME_IDS = {0: "copyright", 1: "family", 2: "style", 4: "full_name", 5: "version", 6: "postscript_name",
+            8: "maker", 13: "licence", 14: "licence_url", 16: "typo_family", 17: "typo_style"}
 
 
 def default_dirs():
@@ -48,8 +48,10 @@ def names(b, t):
         pid, eid, lid, nid, ln, so = struct.unpack(">HHHHHH", b[o + 6 + 12 * i: o + 18 + 12 * i])
         if nid not in NAME_IDS: continue
         raw = b[o + soff + so: o + soff + so + ln]
-        if pid in (0, 3): s, rank = raw.decode("utf-16-be", "replace"), (0 if lid in (0x409, 0) else 1)
-        elif pid == 1: s, rank = raw.decode("mac_roman", "replace"), 2
+        # English names first, on any platform: a name in another language (InaiMathi's Hindi name on
+        # macOS, for example) is not the name other programs use to find the font.
+        if pid in (0, 3): s, rank = raw.decode("utf-16-be", "replace"), (0 if lid in (0x409, 0) else 2)
+        elif pid == 1: s, rank = raw.decode("mac_roman", "replace"), (1 if lid == 0 else 3)
         else: continue
         if nid not in best or rank < best[nid][0]: best[nid] = (rank, s.strip())
     return {NAME_IDS[k]: v[1] for k, v in best.items()}
