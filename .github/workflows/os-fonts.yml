@@ -1,6 +1,7 @@
 name: OS Tamil fonts
 # Lists every Tamil font on GitHub's Windows and macOS runners, installs the optional Windows Tamil
-# fonts, and draws one sample line in each font. Run by hand only. Nothing is committed back:
+# fonts, and draws one sample line and the side-check lines (text/lines.json) in each font. Run by hand
+# only. Nothing is committed back:
 # the results are workflow artifacts, kept for 1 day.
 on:
   workflow_dispatch:
@@ -31,6 +32,8 @@ jobs:
         run: python tools/list_fonts.py out/fonts-${{ runner.os }}.json
       - name: Draw a sample line in each font
         run: python tools/render_sample.py out/fonts-${{ runner.os }}.json out/samples-${{ runner.os }}
+      - name: Draw the side-check lines in each font
+        run: python tools/render_lines.py out/fonts-${{ runner.os }}.json text/lines.json out/lines-${{ runner.os }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

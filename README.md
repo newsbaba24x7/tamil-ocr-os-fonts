@@ -12,7 +12,9 @@ with Windows and macOS. It does this on GitHub's own Windows and macOS runners.
 - **Results are PNG images and JSON lists only.** There are no PDFs, because a PDF carries pieces of
   the fonts. Results are kept as workflow artifacts for one day.
 - **Text is open or in the public domain.** The sample line is from Puṟanāṉūṟu 192, which is in the
-  public domain.
+  public domain. The side-check lines (`text/lines.json`) are pieces of Tamil Wikipedia sentences (CC BY-SA
+  4.0, credited in `text/ATTRIBUTION.md`) and lines written for this project.
+- **The side-check lines are never used to train a model.**
 - **Real scanned documents are never put here.**
 
 ## What runs
@@ -25,8 +27,11 @@ with Windows and macOS. It does this on GitHub's own Windows and macOS runners.
 3. **Draws one sample line in each font face** with headless Google Chrome (`tools/render_sample.py`).
    - Each face is chosen by its own full name and PostScript name, so Chrome draws exactly that face.
    - It also checks that Chrome really used that face rather than its default font.
+4. **Draws the side-check lines in each font face** (`tools/render_lines.py`): up to 100 common lines and
+   up to 30 lines with special characters, using only lines whose every character the face can draw. All of a
+   face's lines go into one tall picture, one line per row, with their text in `lines-<system>/lines.json`.
 
-Both scripts use only the Python standard library.
+All three scripts use only the Python standard library.
 
 ## Licence
 
