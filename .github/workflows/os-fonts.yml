@@ -1,0 +1,38 @@
+name: OS Tamil fonts
+# Lists every Tamil font on GitHub's Windows and macOS runners, installs the optional Windows Tamil
+# fonts, and draws one sample line in each font. Run by hand only. Nothing is committed back:
+# the results are workflow artifacts, kept for 1 day.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fonts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the optional Tamil fonts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Get-WindowsCapability -Online | Where-Object Name -like 'Language.Fonts.Taml*' | Format-Table Name, State
+          Add-WindowsCapability -Online -Name 'Language.Fonts.Taml~~~und-TAML~0.0.1.0'
+          Get-WindowsCapability -Online | Where-Object Name -like 'Language.Fonts.Taml*' | Format-Table Name, State
+      - name: List the Tamil fonts
+        run: python tools/list_fonts.py out/fonts-${{ runner.os }}.json
+      - name: Draw a sample line in each font
+        run: python tools/render_sample.py out/fonts-${{ runner.os }}.json out/samples-${{ runner.os }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tamil-fonts-${{ runner.os }}
+          path: out/
+          retention-days: 1
